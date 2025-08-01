@@ -59,8 +59,10 @@ def train_model(X, y):
 # -------------------
 # Predict single input
 # -------------------
+import pandas as pd
+
 def predict_learning_plan(model, input_dict):
-    # 1. Create sanitized input with guaranteed float values
+    # 1. Create sanitized input with guaranteed types
     sanitized = {
         'overall_accuracy': float(input_dict.get('overall_accuracy', 0)),
         'phoneme_mismatch_rate': float(input_dict.get('phoneme_mismatch_rate', 0)),
@@ -72,10 +74,14 @@ def predict_learning_plan(model, input_dict):
         'ج_error': int(input_dict.get('pronunciation_errors', {}).get('ج', 0))
     }
 
-    # 2. Convert to DataFrame with explicit dtype
-    df = pd.DataFrame([sanitized], dtype='float64')
-    
-    # 3. Ensure column order matches training
+    # 2. Create DataFrame (without forcing dtype)
+    df = pd.DataFrame([sanitized])
+
+    # 3. Explicitly set correct dtypes
+    df["ق_error"] = df["ق_error"].astype(int)
+    df["ج_error"] = df["ج_error"].astype(int)
+
+    # 4. Ensure column order matches training
     expected_cols = [
         'overall_accuracy',
         'phoneme_mismatch_rate',
@@ -90,18 +96,18 @@ def predict_learning_plan(model, input_dict):
         'ق_error',
         'ج_error'
     ]
-    
-    # 4. Debug output
+
+    # 5. Debug output
     print("✅ Sanitized input types:", {k: type(v) for k, v in sanitized.items()})
     print("✅ DataFrame dtypes:\n", df.dtypes)
-    
-    # 5. Predict with error handling
+
+    # 6. Predict with error handling
     try:
         return model.predict(df[expected_cols])[0]
     except Exception as e:
         print(f"❌ Model prediction failed. Input:\n{df[expected_cols]}")
         raise ValueError(f"Prediction failed: {str(e)}") from e
-    
+
 # -------------------
 # Run training
 # -------------------
