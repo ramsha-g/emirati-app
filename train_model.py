@@ -16,15 +16,14 @@ MODALITIES = ["text", "audio", "speech"]
 def load_and_prepare_data(csv_path):
     df = pd.read_csv(csv_path)
 
-    # Flatten nested metrics
     for tag in TAGS:
         df[f"tag_{tag}"] = df[f"accuracy_by_tag.{tag}"]
     for mod in MODALITIES:
         df[f"modality_{mod}"] = df[f"accuracy_by_modality.{mod}"]
 
-    # Ensure errors are integer type
-    df["ق_error"] = df["pronunciation_errors.ق"].astype(int)
-    df["ج_error"] = df["pronunciation_errors.ج"].astype(int)
+    # 🔧 Map string errors to binary flags
+    df["ق_error"] = df["pronunciation_errors.ق"].apply(lambda x: 'yes' if str(x).strip().lower() in ['g', 'q'] else 'no')
+    df["ج_error"] = df["pronunciation_errors.ج"].apply(lambda x: 'yes' if str(x).strip().lower() in ['j', 'ch', 'y'] else 'no')
 
     feature_cols = (
         ["overall_accuracy", "phoneme_mismatch_rate"] +
@@ -36,6 +35,7 @@ def load_and_prepare_data(csv_path):
     y = df["label"]
     return X, y
 
+
 # -------------------
 # Train model
 # -------------------
@@ -45,7 +45,7 @@ def train_model(X, y):
 
     preprocessor = ColumnTransformer([
         ("num", "passthrough", numerical_features),
-        ("cat", OneHotEncoder(), categorical_features)
+        ("cat", OneHotEncoder(handle_unknown='ignore'), categorical_features)
     ])
 
     pipeline = Pipeline([
@@ -59,8 +59,6 @@ def train_model(X, y):
 # -------------------
 # Predict single input
 # -------------------
-import pandas as pd
-
 def predict_learning_plan(model, input_dict):
     # 1. Create sanitized input with guaranteed types
     sanitized = {
@@ -70,18 +68,16 @@ def predict_learning_plan(model, input_dict):
             for tag in ['greeting', 'food', 'travel', 'shopping', 'office']},
         **{f'modality_{mod}': float(input_dict.get('accuracy_by_modality', {}).get(mod, 0))
             for mod in ['text', 'audio', 'speech']},
-        'ق_error': int(input_dict.get('pronunciation_errors', {}).get('ق', 0)),
-        'ج_error': int(input_dict.get('pronunciation_errors', {}).get('ج', 0))
+        'ق_error': 'yes' if input_dict.get('pronunciation_errors', {}).get('ق', 0) else 'no',
+        'ج_error': 'yes' if input_dict.get('pronunciation_errors', {}).get('ج', 0) else 'no'
     }
 
-    # 2. Create DataFrame (without forcing dtype)
+    # 2. Create DataFrame
     df = pd.DataFrame([sanitized])
 
-    # 3. Explicitly set correct dtypes
-    df["ق_error"] = df["ق_error"].astype(int)
-    df["ج_error"] = df["ج_error"].astype(int)
+    # ✅ DO NOT cast to int — OneHotEncoder expects strings now
 
-    # 4. Ensure column order matches training
+    # 3. Ensure column order matches training
     expected_cols = [
         'overall_accuracy',
         'phoneme_mismatch_rate',
@@ -97,22 +93,23 @@ def predict_learning_plan(model, input_dict):
         'ج_error'
     ]
 
-    # 5. Debug output
+    # 4. Debug output
     print("✅ Sanitized input types:", {k: type(v) for k, v in sanitized.items()})
     print("✅ DataFrame dtypes:\n", df.dtypes)
 
-    # 6. Predict with error handling
+    # 5. Predict with error handling
     try:
         return model.predict(df[expected_cols])[0]
     except Exception as e:
         print(f"❌ Model prediction failed. Input:\n{df[expected_cols]}")
         raise ValueError(f"Prediction failed: {str(e)}") from e
 
+
 # -------------------
 # Run training
 # -------------------
 if __name__ == "__main__":
-    csv_path = "synthetic_data.csv"
+    csv_path = "/Users/rmg/Documents/Transcribe/personlisation/synthetic_data.csv"
     X, y = load_and_prepare_data(csv_path)
     print("✅ Data loaded. Number of samples:", len(X))
 
