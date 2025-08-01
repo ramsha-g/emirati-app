@@ -36,16 +36,26 @@ class QuizData(BaseModel):
 def get_plan(data: QuizData):
     try:
         input_dict = data.dict()
-        print("📥 Received input:", input_dict)
         
-        # For debugging, you can uncomment this to test without the model:
-        # return {"plan": "focus_on_greeting"}
+        # Convert all numeric inputs to float explicitly
+        input_dict['overall_accuracy'] = float(input_dict['overall_accuracy'])
+        input_dict['phoneme_mismatch_rate'] = float(input_dict['phoneme_mismatch_rate'])
+        
+        # Convert nested dictionaries
+        for tag in ['greeting', 'food', 'travel', 'shopping', 'office']:
+            input_dict['accuracy_by_tag'][tag] = float(input_dict['accuracy_by_tag'].get(tag, 0))
+            
+        for mod in ['text', 'audio', 'speech']:
+            input_dict['accuracy_by_modality'][mod] = float(input_dict['accuracy_by_modality'].get(mod, 0))
+            
+        print("✅ Processed input:", input_dict)  # Debug log
         
         label = predict_learning_plan(model, input_dict)
         return {"plan": label}
+        
     except Exception as e:
-        print("❌ Prediction error:", str(e))
-        raise HTTPException(status_code=500, detail=str(e))
+        print("❌ Full error:", str(e))
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.get("/health")
 def health_check():
@@ -57,3 +67,9 @@ def health_check():
             "health": "GET /health"
         }
     }
+
+# Add proper root endpoint
+@app.get("/")
+def root():
+    return {"message": "API is running", "docs": "/docs"}
+

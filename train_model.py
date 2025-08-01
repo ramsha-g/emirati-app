@@ -1,3 +1,5 @@
+# Fixing the predict_learning_plan in train_model.py to ensure safe data types
+
 import pandas as pd 
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
@@ -46,51 +48,65 @@ def train_model(X, y):
 
     pipeline.fit(X, y)
     return pipeline
-
-# Fixing the predict_learning_plan in train_model.py to ensure safe data types
-
-# Fixing the predict_learning_plan in train_model.py to ensure safe data types
-
-TAGS = ["greeting", "food", "travel", "shopping", "office"]
-MODALITIES = ["text", "audio", "speech"]
-
 def predict_learning_plan(model, single_input_dict):
-    import pandas as pd
-
-    df_input = pd.json_normalize([single_input_dict])
-
-    # Add default 0.5 values if keys are missing
+    # Create a defensive copy to avoid modifying original
+    input_dict = {k: v for k, v in single_input_dict.items()}
+    
+    # Type conversion with error handling
+    def safe_float(x):
+        try:
+            return float(x)
+        except (TypeError, ValueError):
+            return 0.0  # Default value if conversion fails
+    
+    # Convert numeric fields
+    input_dict['overall_accuracy'] = safe_float(input_dict.get('overall_accuracy', 0))
+    input_dict['phoneme_mismatch_rate'] = safe_float(input_dict.get('phoneme_mismatch_rate', 0))
+    
+    # Convert nested dictionaries
     for tag in TAGS:
-        df_input[f"tag_{tag}"] = single_input_dict.get("accuracy_by_tag", {}).get(tag, 0.5)
+        input_dict['accuracy_by_tag'][tag] = safe_float(
+            input_dict.get('accuracy_by_tag', {}).get(tag, 0.5)
+    
     for mod in MODALITIES:
-        df_input[f"modality_{mod}"] = single_input_dict.get("accuracy_by_modality", {}).get(mod, 0.5)
-
-    # Safely convert phoneme error values to integers (0 or 1)
+        input_dict['accuracy_by_modality'][mod] = safe_float(
+            input_dict.get('accuracy_by_modality', {}).get(mod, 0.5))
+    
+    # Prepare DataFrame with explicit type conversion
+    df_input = pd.DataFrame({
+        'overall_accuracy': [input_dict['overall_accuracy']],
+        'phoneme_mismatch_rate': [input_dict['phoneme_mismatch_rate']],
+        **{f'tag_{tag}': [input_dict['accuracy_by_tag'][tag]] for tag in TAGS},
+        **{f'modality_{mod}': [input_dict['accuracy_by_modality'][mod]] for mod in MODALITIES},
+        'ق_error': [int(input_dict.get('pronunciation_errors', {}).get('ق', 0))],
+        'ج_error': [int(input_dict.get('pronunciation_errors', {}).get('ج', 0))]
+    })
+    
+    # Ensure all feature columns exist
+    feature_cols = [
+        'overall_accuracy',
+        'phoneme_mismatch_rate',
+        *[f'tag_{tag}' for tag in TAGS],
+        *[f'modality_{mod}' for mod in MODALITIES],
+        'ق_error',
+        'ج_error'
+    ]
+    
+    # Verify feature columns match training
+    missing_cols = set(feature_cols) - set(df_input.columns)
+    if missing_cols:
+        for col in missing_cols:
+            df_input[col] = 0.0  # Add missing columns with default value
+    
     try:
-        df_input["ق_error"] = int(single_input_dict.get("pronunciation_errors", {}).get("ق", 0))
-    except (ValueError, TypeError):
-        df_input["ق_error"] = 0
+        return model.predict(df_input[feature_cols])[0]
+    except Exception as e:
+        print(f"❌ Prediction failed: {str(e)}")
+        print("Input DataFrame:\n", df_input[feature_cols])
+        raise
 
-    try:
-        df_input["ج_error"] = int(single_input_dict.get("pronunciation_errors", {}).get("ج", 0))
-    except (ValueError, TypeError):
-        df_input["ج_error"] = 0
-
-    feature_cols = (
-        ["overall_accuracy", "phoneme_mismatch_rate"] +
-        [f"tag_{tag}" for tag in TAGS] +
-        [f"modality_{mod}" for mod in MODALITIES] +
-        ["ق_error", "ج_error"]
-    )
-
-    return model.predict(df_input[feature_cols])[0]
-
-
-
-
-# Run this script manually to retrain and save model
 if __name__ == "__main__":
-    csv_path = "synthetic_data.csv"  # replace with your actual CSV path
+    csv_path = "synthetic_data.csv"
     X, y = load_and_prepare_data(csv_path)
     print("✅ Data loaded. Number of samples:", len(X))
 
