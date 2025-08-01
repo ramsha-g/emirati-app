@@ -1,4 +1,5 @@
-import pandas as pd
+import pandas as pd 
+from . import TAGS, MODALITIES 
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import OneHotEncoder
@@ -47,23 +48,28 @@ def train_model(X, y):
     pipeline.fit(X, y)
     return pipeline
 
-def predict_learning_plan(model, single_input_dict):
-    df_input = pd.json_normalize([single_input_dict])
-    for tag in TAGS:
-        df_input[f"tag_{tag}"] = df_input.get(f"accuracy_by_tag.{tag}", 0.5)
-    for mod in MODALITIES:
-        df_input[f"modality_{mod}"] = df_input.get(f"accuracy_by_modality.{mod}", 0.5)
+# Fixing the predict_learning_plan in train_model.py to ensure safe data types
 
+def predict_learning_plan(model, single_input_dict):
+
+    df_input = pd.json_normalize([single_input_dict])
+
+    # Add default 0.5 values if keys are missing
+    for tag in TAGS:
+        df_input[f"tag_{tag}"] = single_input_dict.get("accuracy_by_tag", {}).get(tag, 0.5)
+    for mod in MODALITIES:
+        df_input[f"modality_{mod}"] = single_input_dict.get("accuracy_by_modality", {}).get(mod, 0.5)
+
+    # Safely convert phoneme error values to integers (0 or 1)
     try:
-        df_input["ق_error"] = int(single_input_dict["pronunciation_errors"].get("ق", 0))
+        df_input["ق_error"] = int(single_input_dict.get("pronunciation_errors", {}).get("ق", 0))
     except (ValueError, TypeError):
         df_input["ق_error"] = 0
 
     try:
-        df_input["ج_error"] = int(single_input_dict["pronunciation_errors"].get("ج", 0))
+        df_input["ج_error"] = int(single_input_dict.get("pronunciation_errors", {}).get("ج", 0))
     except (ValueError, TypeError):
         df_input["ج_error"] = 0
-
 
     feature_cols = (
         ["overall_accuracy", "phoneme_mismatch_rate"] +
@@ -73,6 +79,7 @@ def predict_learning_plan(model, single_input_dict):
     )
 
     return model.predict(df_input[feature_cols])[0]
+
 
 
 # Run this script manually to retrain and save model
