@@ -1,5 +1,4 @@
 import pandas as pd 
-from . import TAGS, MODALITIES 
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import OneHotEncoder
@@ -50,7 +49,13 @@ def train_model(X, y):
 
 # Fixing the predict_learning_plan in train_model.py to ensure safe data types
 
+# Fixing the predict_learning_plan in train_model.py to ensure safe data types
+
+TAGS = ["greeting", "food", "travel", "shopping", "office"]
+MODALITIES = ["text", "audio", "speech"]
+
 def predict_learning_plan(model, single_input_dict):
+    import pandas as pd
 
     df_input = pd.json_normalize([single_input_dict])
 
@@ -79,6 +84,7 @@ def predict_learning_plan(model, single_input_dict):
     )
 
     return model.predict(df_input[feature_cols])[0]
+
 
 
 
