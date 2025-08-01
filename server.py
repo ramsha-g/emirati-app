@@ -3,8 +3,19 @@ from pydantic import BaseModel
 import joblib
 from train_model import predict_learning_plan
 from fastapi.middleware.cors import CORSMiddleware
+import json
+import os
 
 app = FastAPI()
+
+try:
+    TRACKS_PATH = os.path.join(os.path.dirname(__file__), "learning_tracks.json")
+    with open(TRACKS_PATH, "r", encoding="utf-8") as f:
+        LEARNING_TRACKS = json.load(f)
+    print("✅ Learning tracks loaded.")
+except Exception as e:
+    print("❌ Failed to load learning tracks:", str(e))
+    LEARNING_TRACKS = {}
 
 # CORS Configuration
 app.add_middleware(
@@ -51,7 +62,14 @@ def get_plan(data: QuizData):
         print("✅ Processed input:", input_dict)  # Debug log
         
         label = predict_learning_plan(model, input_dict)
-        return {"plan": label}
+        print("✅ Predicted track:", label)  # Debug
+        return {
+            "learning_plan": LEARNING_TRACKS.get(
+                label,
+                {"track": label, "level": "A1", "steps": ["Coming soon..."]}
+            )
+        }
+
         
     except Exception as e:
         print("❌ Full error:", str(e))
