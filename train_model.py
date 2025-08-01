@@ -59,67 +59,49 @@ def train_model(X, y):
 # -------------------
 # Predict single input
 # -------------------
-def predict_learning_plan(model, single_input_dict):
-    # Helper to safely convert to float
-    def safe_float(x):
-        try:
-            return float(x)
-        except (TypeError, ValueError):
-            return 0.0
-
-    # Defensive copy of input
-    input_dict = dict(single_input_dict)
-
-    # Convert top-level fields
-    overall_accuracy = safe_float(input_dict.get('overall_accuracy', 0))
-    phoneme_mismatch_rate = safe_float(input_dict.get('phoneme_mismatch_rate', 0))
-
-    # Extract nested tag accuracy
-    tag_accuracy = {
-        f"tag_{tag}": safe_float(input_dict.get('accuracy_by_tag', {}).get(tag, 0.5))
-        for tag in TAGS
+def predict_learning_plan(model, input_dict):
+    # 1. Create sanitized input with guaranteed float values
+    sanitized = {
+        'overall_accuracy': float(input_dict.get('overall_accuracy', 0)),
+        'phoneme_mismatch_rate': float(input_dict.get('phoneme_mismatch_rate', 0)),
+        **{f'tag_{tag}': float(input_dict.get('accuracy_by_tag', {}).get(tag, 0))
+            for tag in ['greeting', 'food', 'travel', 'shopping', 'office']},
+        **{f'modality_{mod}': float(input_dict.get('accuracy_by_modality', {}).get(mod, 0))
+            for mod in ['text', 'audio', 'speech']},
+        'ق_error': int(input_dict.get('pronunciation_errors', {}).get('ق', 0)),
+        'ج_error': int(input_dict.get('pronunciation_errors', {}).get('ج', 0))
     }
 
-    # Extract nested modality accuracy
-    modality_accuracy = {
-        f"modality_{mod}": safe_float(input_dict.get('accuracy_by_modality', {}).get(mod, 0.5))
-        for mod in MODALITIES
-    }
-
-    # Extract pronunciation errors
-    ق_error = int(input_dict.get('pronunciation_errors', {}).get('ق', 0))
-    ج_error = int(input_dict.get('pronunciation_errors', {}).get('ج', 0))
-
-    # Create input DataFrame
-    df_input = pd.DataFrame([{
-        'overall_accuracy': overall_accuracy,
-        'phoneme_mismatch_rate': phoneme_mismatch_rate,
-        **tag_accuracy,
-        **modality_accuracy,
-        'ق_error': ق_error,
-        'ج_error': ج_error
-    }])
-
-    # Ensure all columns match
-    feature_cols = (
-        ["overall_accuracy", "phoneme_mismatch_rate"] +
-        list(tag_accuracy.keys()) +
-        list(modality_accuracy.keys()) +
-        ["ق_error", "ج_error"]
-    )
-    for col in feature_cols:
-        if col not in df_input:
-            df_input[col] = 0.0
-
-    # Predict
+    # 2. Convert to DataFrame with explicit dtype
+    df = pd.DataFrame([sanitized], dtype='float64')
+    
+    # 3. Ensure column order matches training
+    expected_cols = [
+        'overall_accuracy',
+        'phoneme_mismatch_rate',
+        'tag_greeting',
+        'tag_food',
+        'tag_travel',
+        'tag_shopping',
+        'tag_office',
+        'modality_text',
+        'modality_audio',
+        'modality_speech',
+        'ق_error',
+        'ج_error'
+    ]
+    
+    # 4. Debug output
+    print("✅ Sanitized input types:", {k: type(v) for k, v in sanitized.items()})
+    print("✅ DataFrame dtypes:\n", df.dtypes)
+    
+    # 5. Predict with error handling
     try:
-        prediction = model.predict(df_input[feature_cols])[0]
-        return prediction
+        return model.predict(df[expected_cols])[0]
     except Exception as e:
-        print(f"❌ Prediction failed: {e}")
-        print("Input DataFrame:\n", df_input[feature_cols])
-        raise
-
+        print(f"❌ Model prediction failed. Input:\n{df[expected_cols]}")
+        raise ValueError(f"Prediction failed: {str(e)}") from e
+    
 # -------------------
 # Run training
 # -------------------
