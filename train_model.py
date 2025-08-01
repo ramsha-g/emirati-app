@@ -25,6 +25,38 @@ def load_and_prepare_data(csv_path):
     df["ق_error"] = df["pronunciation_errors.ق"].apply(lambda x: 'yes' if str(x).strip().lower() in ['g', 'q'] else 'no')
     df["ج_error"] = df["pronunciation_errors.ج"].apply(lambda x: 'yes' if str(x).strip().lower() in ['j', 'ch', 'y'] else 'no')
 
+    dummy = pd.DataFrame([{
+        "overall_accuracy": 0.0,
+        "phoneme_mismatch_rate": 0.0,
+        "tag_greeting": 0.0,
+        "tag_food": 0.0,
+        "tag_travel": 0.0,
+        "tag_shopping": 0.0,
+        "tag_office": 0.0,
+        "modality_text": 0.0,
+        "modality_audio": 0.0,
+        "modality_speech": 0.0,
+        "ق_error": "no",
+        "ج_error": "no",
+        "label": "start_from_pronunciation_basics"
+    }, {
+        "overall_accuracy": 1.0,
+        "phoneme_mismatch_rate": 1.0,
+        "tag_greeting": 1.0,
+        "tag_food": 1.0,
+        "tag_travel": 1.0,
+        "tag_shopping": 1.0,
+        "tag_office": 1.0,
+        "modality_text": 1.0,
+        "modality_audio": 1.0,
+        "modality_speech": 1.0,
+        "ق_error": "yes",
+        "ج_error": "yes",
+        "label": "advanced_speaking_track"
+    }])
+
+    df = pd.concat([df, dummy], ignore_index=True)
+
     feature_cols = (
         ["overall_accuracy", "phoneme_mismatch_rate"] +
         [f"tag_{tag}" for tag in TAGS] +
@@ -59,6 +91,8 @@ def train_model(X, y):
 # -------------------
 # Predict single input
 # -------------------
+import pandas as pd
+
 def predict_learning_plan(model, input_dict):
     # 1. Create sanitized input with guaranteed types
     sanitized = {
