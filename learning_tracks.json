@@ -1,5 +1,5 @@
 {
-    "pearl_seeker": {
+    "Pearl Seeker": {
         "track": "Pearl Seeker",
         "level": "A1",
         "steps": [
@@ -9,7 +9,7 @@
             "Build confidence through short speaking challenges with common phrases"
         ]
     },
-    "reef_explorer": {
+    "Reef Explorer": {
         "track": "Reef Explorer",
         "level": "A1-A2",
         "steps": [
@@ -19,7 +19,7 @@
             "Develop comfort with informal and semi-formal conversational structures"
         ]
     },
-    "open_sea_navigator": {
+    "Open Sea Navigator": {
         "track": "Open Sea Navigator",
         "level": "A2-B1",
         "steps": [
