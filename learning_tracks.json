@@ -1,62 +1,32 @@
 {
-    "start_from_pronunciation_basics": {
-        "track": "start_from_pronunciation_basics",
+    "pearl_seeker": {
+        "track": "Pearl Seeker",
         "level": "A1",
         "steps": [
-            "Learn how Emirati Arabic pronounces ق as 'g' and ج as 'y/ch'",
-            "Do focused audio practice on ق and ج",
-            "Record yourself saying: اشحالك؟ / اشحالج؟",
-            "Take a speaking challenge using Emirati greetings"
+            "Master the basics of Emirati pronunciation including how ق is pronounced as 'g' and ج as 'y/ch'",
+            "Practice clear pronunciation through focused audio drills",
+            "Record yourself saying essential greetings and responses",
+            "Build confidence through short speaking challenges with common phrases"
         ]
     },
-    "focus_on_greeting": {
-        "track": "focus_on_greeting",
-        "level": "A1",
+    "reef_explorer": {
+        "track": "Reef Explorer",
+        "level": "A1-A2",
         "steps": [
-            "Practice gendered forms like اشحالك vs اشحالج",
-            "Review expressions like دايماً and مشغول in context",
-            "Listen and repeat greetings like أنا يايا",
-            "Respond to common Emirati phrases like الله يقومج بالسلامة"
+            "Refine gendered language and polite expressions",
+            "Listen and respond to culturally specific Emirati phrases",
+            "Engage with everyday phrases and expressions used in real-life situations",
+            "Develop comfort with informal and semi-formal conversational structures"
         ]
     },
-    "focus_on_food_vocabulary": {
-        "track": "focus_on_food_vocabulary",
-        "level": "A1",
+    "open_sea_navigator": {
+        "track": "Open Sea Navigator",
+        "level": "A2-B1",
         "steps": [
-            "Identify common Emirati food words like يوعانة and مجبوس دياي",
-            "Listen to culturally rich sentences like يارنا طرش النا صحن هريس",
-            "Review correct verb usage with food (e.g., أتغدى not أريد)",
-            "Practice with emoji/emotion-based food expressions 🥰"
-        ]
-    },
-    "travel_and_time_phrases": {
-        "track": "travel_and_time_phrases",
-        "level": "A1",
-        "steps": [
-            "Understand expressions like تعال باجر and بطلع الحين",
-            "Practice common phrases for safe travels: تروحون و تردون بالسلامة",
-            "Answer true/false time questions confidently",
-            "Build short dialogue about future plans using Emirati time words"
-        ]
-    },
-    "polite_requests_and_shopping": {
-        "track": "polite_requests_and_shopping",
-        "level": "A1",
-        "steps": [
-            "Say polite requests: ممكن الفاتورة لو سمحتي؟",
-            "Identify items and their value: شيء غالي (diamond)",
-            "Listen and repeat shopping phrases: ماما متى بتشترين لي تلفون يديد؟",
-            "Use shopping context to ask, compare, and request things"
-        ]
-    },
-    "start_with_office_expressions": {
-        "track": "start_with_office_expressions",
-        "level": "A1",
-        "steps": [
-            "Translate common office actions like طرش إيميل لأحمد",
-            "Practice sentence reordering: طرش إيميل وقول له إن الاجتماع تأجل",
-            "Compare Emirati vs MSA in professional context",
-            "Record yourself using office-related Emirati expressions"
+            "Understand and apply Emirati expressions in professional and social settings",
+            "Translate and rephrase complex sentences between Emirati and MSA",
+            "Record and analyze your own speech for fluency and accuracy",
+            "Participate in longer dialogues involving comparisons, intentions, and formal requests"
         ]
     }
 }
