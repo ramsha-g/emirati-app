@@ -5,8 +5,12 @@ from train_model import predict_learning_plan
 from fastapi.middleware.cors import CORSMiddleware
 import json
 import os
+from fastapi.staticfiles import StaticFiles
+
 
 app = FastAPI()
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 
 try:
     TRACKS_PATH = os.path.join(os.path.dirname(__file__), "learning_tracks.json")
