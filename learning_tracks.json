@@ -3,30 +3,30 @@
         "track": "Pearl Seeker",
         "level": "A1",
         "steps": [
-            "Master the basics of Emirati pronunciation including how ق is pronounced as 'g' and ج as 'y/ch'",
-            "Practice clear pronunciation through focused audio drills",
-            "Record yourself saying essential greetings and responses",
-            "Build confidence through short speaking challenges with common phrases"
+            "Learn how Emirati Arabic letters are pronounced",
+            "Do pronunciation drills for clarity",
+            "Record basic greetings and replies",
+            "Practice short speaking tasks with common phrases"
         ]
     },
     "Reef Explorer": {
         "track": "Reef Explorer",
         "level": "A1-A2",
         "steps": [
-            "Refine gendered language and polite expressions",
-            "Listen and respond to culturally specific Emirati phrases",
-            "Engage with everyday phrases and expressions used in real-life situations",
-            "Develop comfort with informal and semi-formal conversational structures"
+            "Polish gender and polite language",
+            "Reply to local Emirati phrases",
+            "Use everyday phrases in context",
+            "Get used to informal conversation styles"
         ]
     },
     "Open Sea Navigator": {
         "track": "Open Sea Navigator",
         "level": "A2-B1",
         "steps": [
-            "Understand and apply Emirati expressions in professional and social settings",
-            "Translate and rephrase complex sentences between Emirati and MSA",
-            "Record and analyze your own speech for fluency and accuracy",
-            "Participate in longer dialogues involving comparisons, intentions, and formal requests"
+            "Use Emirati phrases in real settings",
+            "Rephrase complex ideas in Emirati and MSA",
+            "Record and review your speech",
+            "Handle longer dialogues and formal talk"
         ]
     }
 }
