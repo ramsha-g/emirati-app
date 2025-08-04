@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import json
 import os
 from fastapi.staticfiles import StaticFiles
-from typing import List
+from typing import List, Optional
 
 
 app = FastAPI()
@@ -86,8 +86,13 @@ def root():
 
 class AnswerEntry(BaseModel):
     id: str
-    user_answer: str = None
-    filename: str = None
+    correct: bool
+    selected: Optional[str]
+    tag: str
+    modality: str
+    skill_targeted: str
+    phoneme_error: Optional[str]
+
 
 @app.post("/upload-answers")
 async def upload_answers(answers: List[AnswerEntry], request: Request):
