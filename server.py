@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 import joblib
 from train_model import predict_learning_plan
@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import json
 import os
 from fastapi.staticfiles import StaticFiles
+from typing import List
 
 
 app = FastAPI()
@@ -81,3 +82,28 @@ def health_check():
 @app.get("/")
 def root():
     return {"message": "API is running", "docs": "/docs"}
+
+
+class AnswerEntry(BaseModel):
+    id: str
+    user_answer: str = None
+    filename: str = None
+
+@app.post("/upload-answers")
+async def upload_answers(answers: List[AnswerEntry], request: Request):
+    try:
+        # Create folder if it doesn't exist
+        os.makedirs("user_answers", exist_ok=True)
+
+        # Create unique filename
+        client_ip = request.client.host.replace(":", "_")
+        output_path = f"user_answers/answers_{client_ip}.json"
+
+        # Save as JSON
+        with open(output_path, "w", encoding="utf-8") as f:
+            json.dump([a.dict() for a in answers], f, ensure_ascii=False, indent=2)
+
+        return {"message": "Answers saved successfully", "file": output_path}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
