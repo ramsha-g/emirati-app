@@ -33,7 +33,7 @@ def transcribe():
             print(f"📁 Saved temp audio: {tmp.name}")
 
             # Transcribe using Whisper
-            result = model.transcribe(tmp.name, language="ar")
+            result = model.transcribe(tmp.name, language="ar", task="transcribe", fp16=False)
             print("📋 Transcript:", result['text'])
 
         os.remove(tmp.name)  # Clean up temp file
